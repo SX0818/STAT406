@@ -1,0 +1,169 @@
+---
+title: "Lab 06 - Classification Trees"
+author: '[Sicily Xie #54385315]'
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    includes:
+      in_header: preamble.tex
+    number_sections: false
+    toc: FALSE
+---
+
+In the lectures last week, several classification methods were
+introduced: LDA, QDA, nearest neighbours and classification trees. The
+first two methods require the assumption of normality in the feature
+space, while the other two are nonparametric.
+
+This week, we will fit a classification tree on the *Iris* flower data
+set used last week. The data set has two predictors, sepal and petal
+lengths, that are used to classify observations into one of the two
+flower species, *versicolor* and *virginica* (coded as 0 and
+1, respectively). 
+
+```{r data-processing, message=FALSE, warning=FALSE}
+library(tidyverse)
+data("iris")
+iris <- iris %>% 
+  filter(Species != "setosa") %>%
+  select(contains("Length"), Species) %>%
+  mutate(Species = fct_drop(Species)) # drop the unused setosa level
+```
+
+
+Questions
+=========
+
+A classification tree separates the feature space into
+(hyperrectangular) regions, where the optimal split at each step is
+chosen to minimize a measure of homogeneity (Gini index or deviance).
+The majority class in each region is the predicted value.
+
+We use the `rpart` function in the package of the same name to fit a
+classification tree. Use the control setting
+`myc <- rpart.control(minsplit=3,cp=1e-8)` and fit the tree using the
+following:
+
+```{r}
+library(rpart)
+myc <- rpart.control(minsplit=3, cp=1e-8)
+set.seed(800)
+```
+
+::: {.solbox data-latex=""}
+
+```{r setup-sol}
+# some code
+model <- rpart(Species~Sepal.Length+Petal.Length, data = iris, method =
+"class",control = myc, parms = list(split = "gini"))
+model
+```
+:::
+
+The `control` parameter tells the function to use the settings given by
+`myc`, and `method=‘class’` specifies a classification (not regression)
+tree. The "`...`" part (model formula) is for you to fill in.
+
+**Q1**
+Use the `plot` and `text` functions to draw the fitted
+tree with labels. How many terminal nodes are there?
+
+::: {.solbox data-latex=""}
+```{r q1-sol}
+# some code
+plot(model,margin = 0.1)
+text(model,use.n = TRUE)
+```
+There are 6 terminal nodes.
+
+:::
+
+
+**Q2**
+Which of these **[terminal]** nodes is the most
+homogeneous, i.e., having the most even split between the two
+species? Write down the corresponding region of the feature space
+and the number of observations in each class within this region.
+
+::: {.solbox data-latex=""}
+
+The terminal nodes that are the most homogeneous split are labelled as virginica, with a 20%/80% split. 
+The feature space is 4.75 < petal length < 5.05, sepal length >= 6.5. 
+The observations of Virginica is 8 while Versicolor is 2.
+
+:::
+
+**Q3**
+Suppose we have two new observations: $\boldsymbol{x}_{1}$ with $(\mbox{Sepal}=4.9,\,\mbox{Petal}=5.3)$ and $\boldsymbol{x}_{2}$ with
+$(\mbox{Sepal}=5.9,\,\mbox{Petal}=4.8)$. What are the predicted
+species based on this fitted tree?
+
+::: {.solbox data-latex=""}
+```{r q3-sol}
+# some code
+x1 <- c(4.9,5.3)
+x2 <- c(5.9,4.8)
+newdata <- data.frame(rbind(x1,x2))
+names(newdata)<-c("Sepal.Length","Petal.Length")
+new_predict <-predict(model,newdata = newdata, type = "class")
+new_predict
+```
+The predicted specie for x1 is virginica, and the predicted specie for x2 is also virginica.
+:::
+
+**Q4**
+
+Is the misclassification rate (i.e., the proportion of
+observations wrongly classified) a good measure of the predictive
+ability of this tree? Why or why not?
+
+::: {.solbox data-latex=""}
+No. 
+Suppose we make the tree infinitely deep then we would guarantee to 
+classify all our training data perfectly, it may over fits badly. 
+Hence, checking only mis-classification rate would not be great.
+
+
+:::
+
+
+Questions 5 and 6 below are optional; correct answers will earn credit
+if you do not score 100% in the preceding questions.\
+
+**Q5**
+Find the observations that are misclassified by this
+tree. What is the misclassification rate?
+    
+**Hint**: Use `predict` with appropriate arguments to obtain the
+fitted classes and compare them with the observed response.
+
+
+::: {.solbox data-latex=""}
+```{r q5-sol}
+# some code
+pred <- predict(model, iris, type = "class")
+new_data <- cbind(iris, pred)
+data_mis <-filter(new_data, Species != pred)
+data_mis
+n_mis <- nrow(data_mis)
+n_mis
+mis_rate <- n_mis/nrow(iris)
+mis_rate
+```
+
+There are 3 observations misclassified, and the misclassification rate is 0.03.
+
+:::
+
+**Q6**
+The `printcp()` function displays the cross-validated
+error rates (refer to the `xerror` column of the output). Based on
+the result, do you think a simpler tree (with fewer splits) may be
+more useful for prediction? Why?
+
+::: {.solbox data-latex=""}
+```{r q6-sol}
+printcp(model)
+```
+We have 5 splits.
+:::

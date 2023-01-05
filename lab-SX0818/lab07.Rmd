@@ -1,0 +1,155 @@
+---
+title: "Lab 07 - Random forests and bagging"
+author: '[your name here]'
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    includes:
+      in_header: preamble.tex
+    number_sections: false
+    toc: FALSE
+---
+
+Brief description
+=================
+
+In these two weeks we covered tree-based classification methods,
+including ensemble classifiers such as bagging and random forests. You
+also learned how to apply boosting on classification trees.
+
+In this lab, we will perform random forest on a heart disease data set,
+in which 13 attributes (features) including age, sex, cholesterol/blood
+sugar level etc. are used to predict the heart disease status (column
+14). The training and test data sets are available on *Connect*, and a
+description can be found at
+<http://archive.ics.uci.edu/ml/datasets/Heart+Disease>.
+
+```{r setup, warning=FALSE, message=FALSE}
+library(randomForest)
+tr <- readRDS("heart_train.RDS")
+te <- readRDS("heart_test.RDS")
+```
+
+Questions
+=========
+
+A classification tree can be sensitive to the input data. Bagging or
+*bootstrap aggregation* tries to produce more stable predictions by
+repeatedly fitting trees to bootstrapped samples (i.e., sampling from
+the original data set with replacement). The final prediction is the
+majority class based on the $K$ trees, where $K$ is the number of
+bootstrap samples trained. By
+making a single change to bagging --- that in each split of the tree we
+restrict the algorithm to choosing among only $m$ randomly selected
+features (smaller than $p$, the total number of features), we obtain the
+random forest procedure that reduces the correlation among the trees.
+
+We use the `randomForest()` function in the package of the same name to
+fit a classification tree. Use the following lines to fit a random
+forest to the training data with 1,501 trees:
+
+The "`...`" part is for you to fill in.
+
+**Q1** How many features are randomly selected as possible
+candidates in each split (i.e., the value of $m$ in the above
+description)? **Hint**: See `?randomForest()`.
+    
+    
+::: {.solbox data-latex=""}    
+```{r q1-sol}
+set.seed(200)
+
+
+```
+
+:::
+
+
+**Q2** Plot the fitted object. Do you think using 1,501 trees
+    is sufficient? Why?\
+
+::: {.solbox data-latex=""}
+
+```{r q2-sol}
+# some code
+
+```
+
+
+:::
+
+
+**Q3** Using the `varImpPlot()` function, write down the 3 most
+important variables in terms of their contribution to the decrease
+in homogeneity.
+
+::: {.solbox data-latex=""}
+
+```{r q3-sol}
+# some code
+
+```
+    
+
+:::
+
+**Q4** What is the out-of-bag error rate for the random forest fit in **Q1**?
+
+
+::: {.solbox data-latex=""}
+Some text.
+
+:::
+
+**Q5** What is the value of $m$ (number of candidate variables
+in each split) that corresponds to bagging? Using this value of $m$,
+perform bagging by including also the argument `mtry=m` in
+`randomForest`. What is the OOB error using bagging? **[Again, make sure you run `set.seed(200)` before running `randomForest()`.]**
+
+::: {.solbox data-latex=""}
+The value of $m$ for bagging is the number of predictors so `r ncol(tr)-1`.
+
+```{r q5-sol}
+set.seed(200)
+
+
+```
+
+:::
+
+**Q6** Obtain the misclassification rate based on the test
+set, using the random forest fit in **Q1**. Do you expect this value
+to be similar to the OOB error rate? Why?
+
+
+::: {.solbox data-latex=""}
+```{r q6-sol}
+# some code
+
+```
+
+:::
+
+
+**Q7** In the random forest fitted in **Q1**, how many
+bootstrapped samples (out of 1,501) do **not** contain the third
+observation? How many of these trees predict this observation (which
+is OOB to them) as "Y"? **Hint**: You can obtain this information from the fitted `randomForest` object.
+
+::: {.solbox data-latex=""}
+Some text.
+
+:::
+
+
+**Q8** Notice that the random forest OOB error is lower than
+the bagging OOB error for this heart rate data set. Provide two
+advantages of random forests over bagging for decision trees.
+**Hint(s)**: Which of trees from either fits will be more independent
+from each other: the ones from a random forest or the ones from
+bagging? Which method favors the use of more features?
+
+::: {.solbox data-latex=""}
+Some text.
+
+:::

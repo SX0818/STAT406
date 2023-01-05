@@ -1,0 +1,156 @@
+---
+title: "Lab 00 - R-squared and garbage predictors"
+author: '[your name here]'
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    includes:
+      in_header: preamble.tex
+    number_sections: false
+    toc: FALSE
+---
+
+
+
+
+# The linear model
+
+You have seen the equation
+
+\[
+y_i = x_i^\top\beta + \epsilon_i
+\]
+
+many times while learning about linear models. 
+
+* In the first part of this lab, we're going to generate data from this model. 
+
+* Why generate data? Because it forces us to think about where these objects _come from_.
+
+**Q1**
+What does the $i$ subscript indicate? Under standard assumptions, what distribution does $y_i$ have?
+
+::: {.solbox data-latex=""}
+Some text.
+
+:::
+
+
+We almost always think of the design matrix $X=[x_1\ x_2\ \cdots]^\top$ as fixed and $\beta$ as a **population** parameter. This means that the only randomness comes from $\epsilon$. Unfortunately, in order to _create_ data, we need numbers in $X$ and in $\beta$.
+
+**Q2**
+Write the R code required to generate a sequence of integers from 1 to 10.
+
+::: {.solbox data-latex=""}
+```{r q2-sol}
+# some code
+
+```
+:::
+
+
+Think of those integers as your population $\beta$, if we had 10 predictors.
+
+**Q3**
+What if we had 20? Or $p$?
+
+::: {.solbox data-latex=""}
+```{r q3-sol}
+# some code
+
+```
+:::
+
+
+**Q4**
+Now what if we create our design matrix $X$. How big should it be? 
+Write code to create $X$ with $n=10$ rows and $p=5$ columns. Generate each entry as
+random uniform between -1 and 1.
+
+::: {.solbox data-latex=""}
+```{r q4-sol}
+
+#some code
+
+```
+:::
+
+
+**Q5**
+Write a function that generates data from a linear model.
+Our function should take 3 arguments
+
+* `n` the number of observations
+* `p` the number of predictors
+* `sigma` the standard deviation of `epsilon`
+
+The starter code below has a *default* value for `sigma=`. Set that to `1`.
+
+Make $\beta$ a sequence of integers from 1 to `p`.
+
+Make $X$ random uniform numbers between -1 and 1.
+
+Make $\epsilon$ satisfy our usual assumptions with the correct standard deviation.
+
+Return a `data.frame` that contains `y` and `X`.
+
+
+::: {.solbox data-latex=""}
+```{r q5-sol}
+generate_data <- function(___, ___, sigma = ___) {
+  beta <- 
+  X <- matrix( , nrow = n)
+  epsilon <- 
+  y <- X %*% beta + epsilon
+  df <- data.frame(y, X)
+  return(df)
+}
+```
+:::
+
+
+**Q6**
+Does the linear model you just created have an intercept?",
+How would you estimate the linear model without intercept in `R`?
+
+::: {.solbox data-latex=""}
+Some text.
+
+
+:::
+
+
+# How does R-squared behave?
+
+
+We want to know what happens to $R^2$ if we add more predictors __that are useless__. That is, predictors whose coefficient is 0. Make a new function `garbage_rsq()` that is similar to your `generate_data()` function. The modifications are
+
+* The __true__ predictors have non-zero $\beta_j=j$.
+* The __garbage__ predictors have $\beta_j=0$.
+* It runs `lm` on your data and returns only $R^2$.
+* Set the default sigma to 10.
+
+
+**Q7**
+Think just about $R^2$. What happens if we make $\sigma$ really small and there are no fake predictors? What happens if we make $\sigma$ large? What happens if there are lots of fake predictors? Does $R^2$ ever decrease when you add predictors (real or fake)?
+
+**Note:** Each time you run your function (even with the same arguments) the data changes (it's random). So you may need to run a few times, or set a seed.
+
+
+::: {.solbox data-latex=""}
+```{r q7-solution}
+garbage_rsq <- function(n, ntrue_p, ngarbage_p, sigma = ___) {
+  beta <- 1:ntrue_p
+  X <- 
+  epsilon <- rnorm(n, 0, sigma)
+  y <- X[, 1:ntrue_p, drop=FALSE] %*% beta + epsilon
+  summary(lm(y~X))$r.sq
+}
+
+
+
+```
+
+
+
+:::
