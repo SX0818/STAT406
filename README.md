@@ -1,1 +1,1 @@
-# STAT406
+# UBC STAT 406
